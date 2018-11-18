@@ -2,10 +2,12 @@ using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
 using System.Linq;
 using TodoApi.Models;
+using TodoApi.ViewModels;
 using Microsoft.EntityFrameworkCore;
 
 namespace TodoApi.Controllers
 {
+    [Route("api/users/{userId}/[controller]")]
     [ApiController]
     public class TodoListsController : ControllerBase
     {
@@ -16,74 +18,92 @@ namespace TodoApi.Controllers
             _context = context;
         }
 
-        [HttpGet("api/users/{userId}/[controller]")]
-        public ActionResult<List<TodoList>> GetAllTodoLists(int userId)
+        [HttpGet]
+        public ActionResult<List<TodoListVm>> GetAllTodoLists(int userId)
         {
             var user = _context.Users
                 .Where(x => x.Id == userId)
                 .Include(x => x.TodoLists)
                 .FirstOrDefault();
-            if (user == null) return NotFound();
-            return user.TodoLists.ToList();
-
-            // return _context.TodoLists
-            //     .Where(x => x.User.Id == userId)
-            //     .Include(x => x.User).ToList();
-        }
-
-        [HttpGet("api/users/{userId}/[controller]/{id}", Name = "GetTodoListById")]
-        public ActionResult<TodoList> GetTodoListById(int id)
-        {
-            var list = _context.TodoLists.Where(x => x.Id == id).Include(x => x.User).FirstOrDefault();
-            if (list == null)
-            {
-                return NotFound();
-            }
-            return list;
-        }
-
-        [HttpPost("api/[controller]")]
-        public IActionResult CreateTodoList(TodoList list)
-        {
-            var user = _context.Users.Find(list.User.Id);
-            list.User = user;
-
-            _context.TodoLists.Add(list);
-            _context.SaveChanges();
-
-            return CreatedAtRoute("GetTodoListById", new { id = list.Id }, list);
-        }
-
-        [HttpPut("api/[controller]/{id}")]
-        public IActionResult UpdateTodoList(int id, TodoList list)
-        {
-            var existingList = _context.TodoLists.Find(id);
-            if (existingList == null)
-            {
-                return NotFound();
-            }
-
-            existingList.IsComplete = list.IsComplete;
-            existingList.Name = list.Name;
-
-            _context.TodoLists.Update(existingList);
-            _context.SaveChanges();
             
-            return NoContent();
-        }
+            if (user == null) return NotFound();
 
-        [HttpDelete("api/[controller]{id}")]
-        public IActionResult DeleteTodoList(int id)
-        {
-            var list = _context.TodoLists.Find(id);
-            if (list == null)
+            var todoListVms = new List<TodoListVm>();
+            foreach(var list in user.TodoLists)
             {
-                return NotFound();
+                todoListVms.Add(new TodoListVm{
+                    Id = list.Id,
+                    Name = list.Name,
+                    IsComplete = list.IsComplete
+                });
             }
-
-            _context.TodoLists.Remove(list);
-            _context.SaveChanges();
-            return NoContent();
+            
+            return todoListVms;
         }
+
+        [HttpGet("{todoListId}", Name = "GetTodoListById")]
+        public ActionResult<TodoListVm> GetTodoListById(int userId, int todoListId)
+        {
+            var user = _context.Users
+                .Where(x => x.Id == userId)
+                .Include(x => x.TodoLists)
+                .FirstOrDefault();
+            
+            if (user == null) return NotFound();
+
+            var todoList = user.TodoLists.FirstOrDefault(x => x.Id == todoListId);
+
+            if (todoList == null) return NotFound();
+            
+            return new TodoListVm {
+                Id = todoList.Id,
+                Name = todoList.Name,
+                IsComplete = todoList.IsComplete
+            };
+        }
+
+        // [HttpPost("api/[controller]")]
+        // public IActionResult CreateTodoList(TodoList list)
+        // {
+        //     var user = _context.Users.Find(list.User.Id);
+        //     list.User = user;
+
+        //     _context.TodoLists.Add(list);
+        //     _context.SaveChanges();
+
+        //     return CreatedAtRoute("GetTodoListById", new { id = list.Id }, list);
+        // }
+
+        // [HttpPut("api/[controller]/{id}")]
+        // public IActionResult UpdateTodoList(int id, TodoList list)
+        // {
+        //     var existingList = _context.TodoLists.Find(id);
+        //     if (existingList == null)
+        //     {
+        //         return NotFound();
+        //     }
+
+        //     existingList.IsComplete = list.IsComplete;
+        //     existingList.Name = list.Name;
+
+        //     _context.TodoLists.Update(existingList);
+        //     _context.SaveChanges();
+            
+        //     return NoContent();
+        // }
+
+        // [HttpDelete("api/[controller]{id}")]
+        // public IActionResult DeleteTodoList(int id)
+        // {
+        //     var list = _context.TodoLists.Find(id);
+        //     if (list == null)
+        //     {
+        //         return NotFound();
+        //     }
+
+        //     _context.TodoLists.Remove(list);
+        //     _context.SaveChanges();
+        //     return NoContent();
+        // }
     }
 }
