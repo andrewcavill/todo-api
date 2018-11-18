@@ -1,0 +1,7 @@
+namespace TodoApi.Exceptions
+{
+    public class BusinessLogicException : Exceptions
+    {
+
+    }
+}
