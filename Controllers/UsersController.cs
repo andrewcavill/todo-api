@@ -64,7 +64,7 @@ namespace TodoApi.Controllers
             _context.Users.Add(user);
             _context.SaveChanges();
 
-            return CreatedAtRoute("GetUserById", new { id = user.Id }, user);
+            return CreatedAtRoute("GetUserById", new { id = user.Id }, user.Id);
         }
 
         [HttpPut("{id}")]
