@@ -6,6 +6,8 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using TodoApi.Models;
+using TodoApi.Services;
+using TodoApi.IServices;
 
 namespace TodoApi
 {
@@ -25,6 +27,8 @@ namespace TodoApi
             services.AddDbContext<TodoContext>(options =>
                 options.UseNpgsql(Configuration.GetConnectionString("TodoContext")));
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
+
+            services.AddScoped<IUserService, UserService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

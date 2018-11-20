@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
 using System.Linq;
 using TodoApi.Models;
+using TodoApi.IServices;
 using TodoApi.ViewModels;
 
 namespace TodoApi.Controllers
@@ -10,19 +11,18 @@ namespace TodoApi.Controllers
     [ApiController]
     public class UsersController : ControllerBase
     {
-        private readonly TodoContext _context;
+        private readonly IUserService _userService;
 
-        public UsersController(TodoContext context)
+        public UsersController(IUserService userService)
         {
-            _context = context;
+            _userService = userService;
         }
 
         [HttpGet]
         public ActionResult<List<UserVm>> GetAllUsers()
         {
             var userVms = new List<UserVm>();
-
-            foreach(var user in _context.Users)
+            foreach(var user in _userService.GetAll())
             {
                 userVms.Add(new UserVm{
                     Id = user.Id,
@@ -30,18 +30,14 @@ namespace TodoApi.Controllers
                     Name = user.Name
                 });
             }
-
             return userVms;
         }
 
         [HttpGet("{id}", Name = "GetUserById")]
         public ActionResult<UserVm> GetUserById(int id)
         {
-            var user = _context.Users.Find(id);
-            if (user == null)
-            {
-                return NotFound();
-            }
+            var user = _userService.GetById(id);
+            if (user == null) return NotFound();
             return new UserVm
             {
                 Id = user.Id,
@@ -53,48 +49,31 @@ namespace TodoApi.Controllers
         [HttpPost]
         public IActionResult CreateUser(UserCreateVm userCreateVm)
         {
-            int nextId = _context.Users.Max(x => (int)x.Id) + 1;
-
             var user = new User {
-                Id = nextId,
                 Email = userCreateVm.Email,
                 Name = userCreateVm.Name
             };
-
-            _context.Users.Add(user);
-            _context.SaveChanges();
-
+            _userService.Create(user);
             return CreatedAtRoute("GetUserById", new { id = user.Id }, user.Id);
         }
 
         [HttpPut("{id}")]
         public IActionResult UpdateUser(int id, UserCreateVm userCreateVm)
         {
-            var user = _context.Users.Find(id);
-            if (user == null)
-            {
-                return NotFound();
-            }
-
+            var user = _userService.GetById(id);
+            if (user == null) return NotFound();
             user.Email = userCreateVm.Email;
             user.Name = userCreateVm.Name;
-
-            _context.SaveChanges();
-
+            _userService.Update(user);
             return NoContent();
         }
 
         [HttpDelete("{id}")]
         public IActionResult Delete(int id)
         {
-            var user = _context.Users.Find(id);
-            if (user == null)
-            {
-                return NotFound();
-            }
-
-            _context.Users.Remove(user);
-            _context.SaveChanges();
+            var user = _userService.GetById(id);
+            if (user == null) return NotFound();
+            _userService.Delete(user);
             return NoContent();
         }
     }
