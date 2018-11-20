@@ -100,7 +100,7 @@ namespace TodoApi.Controllers
 
             if (user == null) return NotFound();
 
-             var todoList = user.TodoLists.FirstOrDefault(x => x.Id == todoListId);
+            var todoList = user.TodoLists.FirstOrDefault(x => x.Id == todoListId);
 
             if (todoList == null) return NotFound();
 
@@ -112,18 +112,24 @@ namespace TodoApi.Controllers
             return NoContent();
         }
 
-        // [HttpDelete("api/[controller]{id}")]
-        // public IActionResult DeleteTodoList(int id)
-        // {
-        //     var list = _context.TodoLists.Find(id);
-        //     if (list == null)
-        //     {
-        //         return NotFound();
-        //     }
+        [HttpDelete("{todoListId}")]
+        public IActionResult DeleteTodoList(int userId, int todoListId)
+        {
+            var user = _context.Users
+                .Where(x => x.Id == userId)
+                .Include(x => x.TodoLists)
+                .FirstOrDefault();
 
-        //     _context.TodoLists.Remove(list);
-        //     _context.SaveChanges();
-        //     return NoContent();
-        // }
+            if (user == null) return NotFound();
+
+            var todoList = user.TodoLists.FirstOrDefault(x => x.Id == todoListId);
+
+            if (todoList == null) return NotFound();
+
+            _context.TodoLists.Remove(todoList);
+            _context.SaveChanges();
+
+            return NoContent();
+        }
     }
 }
