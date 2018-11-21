@@ -19,7 +19,7 @@ namespace TodoApi.Controllers
         }
 
         [HttpGet]
-        public ActionResult<List<UserVm>> GetAllUsers()
+        public ActionResult<List<UserVm>> GetAll()
         {
             var userVms = new List<UserVm>();
             foreach(var user in _userService.GetAll())

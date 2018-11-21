@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
 using System.Linq;
+using TodoApi.IServices;
 using TodoApi.Models;
 using TodoApi.ViewModels;
 using Microsoft.EntityFrameworkCore;
@@ -11,23 +12,22 @@ namespace TodoApi.Controllers
     [ApiController]
     public class TodoListsController : ControllerBase
     {
-        private readonly TodoContext _context;
+        private readonly IUserService _userService;
+        private readonly ITodoListService _todoListService;
 
-        public TodoListsController(TodoContext context)
+        public TodoListsController(IUserService userService, ITodoListService todoListService)
         {
-            _context = context;
+            _userService = userService;
+            _todoListService = todoListService;
         }
 
         [HttpGet]
-        public ActionResult<List<TodoListVm>> GetAllTodoLists(int userId)
+        public ActionResult<List<TodoListVm>> GetAll(int userId)
         {
-            var user = _context.Users
-                .Where(x => x.Id == userId)
-                .Include(x => x.TodoLists)
-                .FirstOrDefault();
-            
+            var user = _userService.GetById(userId);
             if (user == null) return NotFound();
 
+            var todoLists = _todoListService.GetAll(userId);
             var todoListVms = new List<TodoListVm>();
             foreach(var list in user.TodoLists)
             {
@@ -42,17 +42,9 @@ namespace TodoApi.Controllers
         }
 
         [HttpGet("{todoListId}", Name = "GetTodoList")]
-        public ActionResult<TodoListVm> GetTodoList(int userId, int todoListId)
+        public ActionResult<TodoListVm> GetById(int userId, int todoListId)
         {
-            var user = _context.Users
-                .Where(x => x.Id == userId)
-                .Include(x => x.TodoLists)
-                .FirstOrDefault();
-            
-            if (user == null) return NotFound();
-
-            var todoList = user.TodoLists.FirstOrDefault(x => x.Id == todoListId);
-
+            var todoList = _todoListService.GetById(userId, todoListId);
             if (todoList == null) return NotFound();
             
             return new TodoListVm {
@@ -63,25 +55,17 @@ namespace TodoApi.Controllers
         }
 
         [HttpPost]
-        public IActionResult CreateTodoList(int userId, TodoListCreateVm todoListCreateVm)
+        public IActionResult Create(int userId, TodoListCreateVm todoListCreateVm)
         {
-            var user = _context.Users
-                .Where(x => x.Id == userId)
-                .Include(x => x.TodoLists)
-                .FirstOrDefault();
-
+            var user = _userService.GetById(userId);
             if (user == null) return NotFound();
 
-            int nextId = _context.TodoLists.Max(x => (int)x.Id) + 1;
-
             var todoList = new TodoList {
-                Id = nextId,
                 Name = todoListCreateVm.Name,
                 User = user
             };
 
-            _context.TodoLists.Add(todoList);
-            _context.SaveChanges();
+            _todoListService.Create(todoList);
 
             return CreatedAtRoute(
                 "GetTodoList", 
@@ -93,42 +77,22 @@ namespace TodoApi.Controllers
         public IActionResult UpdateTodoList(int userId, int todoListId, 
             TodoListUpdateVm todoListUpdateVm)
         {
-            var user = _context.Users
-                .Where(x => x.Id == userId)
-                .Include(x => x.TodoLists)
-                .FirstOrDefault();
-
-            if (user == null) return NotFound();
-
-            var todoList = user.TodoLists.FirstOrDefault(x => x.Id == todoListId);
-
+            var todoList = _todoListService.GetById(userId, todoListId);
             if (todoList == null) return NotFound();
 
             todoList.Name = todoListUpdateVm.Name;
             todoList.IsComplete = todoListUpdateVm.IsComplete;
-
-            _context.SaveChanges();
-            
+            _todoListService.Update(todoList);
             return NoContent();
         }
 
         [HttpDelete("{todoListId}")]
         public IActionResult DeleteTodoList(int userId, int todoListId)
         {
-            var user = _context.Users
-                .Where(x => x.Id == userId)
-                .Include(x => x.TodoLists)
-                .FirstOrDefault();
-
-            if (user == null) return NotFound();
-
-            var todoList = user.TodoLists.FirstOrDefault(x => x.Id == todoListId);
-
+            var todoList = _todoListService.GetById(userId, todoListId);
             if (todoList == null) return NotFound();
 
-            _context.TodoLists.Remove(todoList);
-            _context.SaveChanges();
-
+            _todoListService.Delete(todoList);
             return NoContent();
         }
     }
