@@ -8,6 +8,7 @@ using Microsoft.Extensions.DependencyInjection;
 using TodoApi.Models;
 using TodoApi.Services;
 using TodoApi.IServices;
+using AutoMapper;
 
 namespace TodoApi
 {
@@ -26,6 +27,9 @@ namespace TodoApi
             //services.AddDbContext<TodoContext>(opt => opt.UseInMemoryDatabase("TodoList"));
             services.AddDbContext<TodoContext>(options =>
                 options.UseNpgsql(Configuration.GetConnectionString("TodoContext")));
+            
+            services.AddAutoMapper();
+            
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
 
             services.AddScoped<IUserService, UserService>();

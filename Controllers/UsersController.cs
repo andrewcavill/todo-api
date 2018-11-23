@@ -1,3 +1,4 @@
+using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,25 +13,19 @@ namespace TodoApi.Controllers
     public class UsersController : ControllerBase
     {
         private readonly IUserService _userService;
+        private readonly IMapper _mapper;
 
-        public UsersController(IUserService userService)
+        public UsersController(IUserService userService, IMapper mapper)
         {
             _userService = userService;
+            _mapper = mapper;
         }
 
         [HttpGet]
         public ActionResult<List<UserVm>> GetAll()
         {
-            var userVms = new List<UserVm>();
-            foreach(var user in _userService.GetAll())
-            {
-                userVms.Add(new UserVm{
-                    Id = user.Id,
-                    Email = user.Email,
-                    Name = user.Name
-                });
-            }
-            return userVms;
+            var users = _userService.GetAll();
+            return _mapper.Map<List<UserVm>>(users);
         }
 
         [HttpGet("{id}", Name = "GetUserById")]
@@ -38,21 +33,13 @@ namespace TodoApi.Controllers
         {
             var user = _userService.GetById(id);
             if (user == null) return NotFound();
-            return new UserVm
-            {
-                Id = user.Id,
-                Email = user.Email,
-                Name = user.Name
-            };
+            return _mapper.Map<UserVm>(user);
         }
 
         [HttpPost]
         public IActionResult CreateUser(UserCreateVm userCreateVm)
         {
-            var user = new User {
-                Email = userCreateVm.Email,
-                Name = userCreateVm.Name
-            };
+            var user = _mapper.Map<User>(userCreateVm);
             _userService.Create(user);
             return CreatedAtRoute("GetUserById", new { id = user.Id }, user.Id);
         }
@@ -62,8 +49,7 @@ namespace TodoApi.Controllers
         {
             var user = _userService.GetById(id);
             if (user == null) return NotFound();
-            user.Email = userCreateVm.Email;
-            user.Name = userCreateVm.Name;
+            _mapper.Map(userCreateVm, user);
             _userService.Update(user);
             return NoContent();
         }
