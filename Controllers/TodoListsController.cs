@@ -1,3 +1,4 @@
+using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,11 +15,14 @@ namespace TodoApi.Controllers
     {
         private readonly IUserService _userService;
         private readonly ITodoListService _todoListService;
+        private readonly IMapper _mapper;
 
-        public TodoListsController(IUserService userService, ITodoListService todoListService)
+        public TodoListsController(IUserService userService, ITodoListService todoListService,
+            IMapper mapper)
         {
             _userService = userService;
             _todoListService = todoListService;
+            _mapper = mapper;
         }
 
         [HttpGet]
@@ -28,17 +32,8 @@ namespace TodoApi.Controllers
             if (user == null) return NotFound();
 
             var todoLists = _todoListService.GetAll(userId);
-            var todoListVms = new List<TodoListVm>();
-            foreach(var list in user.TodoLists)
-            {
-                todoListVms.Add(new TodoListVm{
-                    Id = list.Id,
-                    Name = list.Name,
-                    IsComplete = list.IsComplete
-                });
-            }
-            
-            return todoListVms;
+
+            return _mapper.Map<List<TodoListVm>>(todoLists);
         }
 
         [HttpGet("{todoListId}", Name = "GetTodoList")]
@@ -46,12 +41,8 @@ namespace TodoApi.Controllers
         {
             var todoList = _todoListService.GetById(userId, todoListId);
             if (todoList == null) return NotFound();
-            
-            return new TodoListVm {
-                Id = todoList.Id,
-                Name = todoList.Name,
-                IsComplete = todoList.IsComplete
-            };
+
+            return _mapper.Map<TodoListVm>(todoList);
         }
 
         [HttpPost]
@@ -60,11 +51,8 @@ namespace TodoApi.Controllers
             var user = _userService.GetById(userId);
             if (user == null) return NotFound();
 
-            var todoList = new TodoList {
-                Name = todoListCreateVm.Name,
-                User = user
-            };
-
+            var todoList = _mapper.Map<TodoList>(todoListCreateVm);
+            todoList.User = user;
             _todoListService.Create(todoList);
 
             return CreatedAtRoute(
@@ -80,9 +68,9 @@ namespace TodoApi.Controllers
             var todoList = _todoListService.GetById(userId, todoListId);
             if (todoList == null) return NotFound();
 
-            todoList.Name = todoListUpdateVm.Name;
-            todoList.IsComplete = todoListUpdateVm.IsComplete;
+            _mapper.Map(todoListUpdateVm, todoList);
             _todoListService.Update(todoList);
+
             return NoContent();
         }
 
@@ -93,6 +81,7 @@ namespace TodoApi.Controllers
             if (todoList == null) return NotFound();
 
             _todoListService.Delete(todoList);
+            
             return NoContent();
         }
     }

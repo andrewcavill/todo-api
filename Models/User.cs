@@ -9,7 +9,5 @@ namespace TodoApi.Models
         public string Email { get; set; }
 
         public string Name { get; set; }
-
-        public IList<TodoList> TodoLists { get; set; }
     }
 }

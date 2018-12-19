@@ -10,6 +10,8 @@ namespace TodoApi.ViewModels
 
         public bool IsComplete { get; set; }
 
-        public List<TodoItemVm> Items { get; set; }
+        public int NumberOfItems { get; set; }
+
+        public int NumberOfItemsCompleted { get; set; }
     }
 }
