@@ -28,7 +28,7 @@ namespace TodoApi.Controllers
         [HttpGet]
         public ActionResult<List<TodoListVm>> GetAll(int userId)
         {
-            var user = _userService.GetById(userId);
+            var user = _userService.Get(userId);
             if (user == null) return NotFound();
 
             var todoLists = _todoListService.GetAll(userId);
@@ -39,7 +39,7 @@ namespace TodoApi.Controllers
         [HttpGet("{todoListId}", Name = "GetTodoList")]
         public ActionResult<TodoListVm> GetById(int userId, int todoListId)
         {
-            var todoList = _todoListService.GetById(userId, todoListId);
+            var todoList = _todoListService.Get(userId, todoListId);
             if (todoList == null) return NotFound();
 
             return _mapper.Map<TodoListVm>(todoList);
@@ -48,7 +48,7 @@ namespace TodoApi.Controllers
         [HttpPost]
         public IActionResult Create(int userId, TodoListCreateVm todoListCreateVm)
         {
-            var user = _userService.GetById(userId);
+            var user = _userService.Get(userId);
             if (user == null) return NotFound();
 
             var todoList = _mapper.Map<TodoList>(todoListCreateVm);
@@ -62,10 +62,10 @@ namespace TodoApi.Controllers
         }
 
         [HttpPut("{todoListId}")]
-        public IActionResult UpdateTodoList(int userId, int todoListId, 
+        public IActionResult Update(int userId, int todoListId, 
             TodoListUpdateVm todoListUpdateVm)
         {
-            var todoList = _todoListService.GetById(userId, todoListId);
+            var todoList = _todoListService.Get(userId, todoListId);
             if (todoList == null) return NotFound();
 
             _mapper.Map(todoListUpdateVm, todoList);
@@ -75,9 +75,9 @@ namespace TodoApi.Controllers
         }
 
         [HttpDelete("{todoListId}")]
-        public IActionResult DeleteTodoList(int userId, int todoListId)
+        public IActionResult Delete(int userId, int todoListId)
         {
-            var todoList = _todoListService.GetById(userId, todoListId);
+            var todoList = _todoListService.Get(userId, todoListId);
             if (todoList == null) return NotFound();
 
             _todoListService.Delete(todoList);

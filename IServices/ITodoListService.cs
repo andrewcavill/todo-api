@@ -7,7 +7,7 @@ namespace TodoApi.IServices
     {
         List<TodoList> GetAll(int userId);
 
-        TodoList GetById(int userId, int todoListId);
+        TodoList Get(int userId, int todoListId);
 
         void Create(TodoList todoList);
 

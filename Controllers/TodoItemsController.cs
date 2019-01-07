@@ -12,74 +12,72 @@ namespace TodoApi.Controllers
     [ApiController]
     public class TodoItemsController : ControllerBase
     {
-        private readonly TodoContext _context;
         private readonly ITodoListService _todoListService;
+        private readonly ITodoItemService _todoItemService;
         private readonly IMapper _mapper;
 
-        public TodoItemsController(TodoContext context, IMapper mapper)
+        public TodoItemsController(ITodoListService todoListService, ITodoItemService todoItemService, IMapper mapper)
         {
-            _context = context;
+            _todoListService = todoListService;
+            _todoItemService = todoItemService;
             _mapper = mapper;
         }
 
         [HttpGet]
-        public ActionResult<List<TodoItemVm>> GetAllTodoItems(int userId, int todoListId)
+        public ActionResult<List<TodoItemVm>> GetAll(int userId, int todoListId)
         {
-            var todoList = _todoListService.GetById(userId, todoListId);
+            var todoList = _todoListService.Get(userId, todoListId);
             if (todoList == null) return NotFound();
 
             return _mapper.Map<List<TodoItemVm>>(todoList.TodoItems);
         }
 
-        [HttpGet("{todoItemId}", Name = "GetTodoItemById")]
-        public ActionResult<TodoItemVm> GetTodoItemById(int userId, int todoListId, int todoItemId)
+        [HttpGet("{todoItemId}", Name = "GetTodoItem")]
+        public ActionResult<TodoItemVm> GetById(int userId, int todoListId, int todoItemId)
         {
-            var todoList = _todoListService.GetById(userId, todoListId);
-            if (todoList == null) return NotFound();
-
-            var todoItem = todoList.TodoItem(todoItemId);
+            var todoItem = _todoItemService.Get(userId, todoListId, todoItemId);
             if (todoItem == null) return NotFound();
 
             return _mapper.Map<TodoItemVm>(todoItem);
         }
 
         [HttpPost]
-        public IActionResult CreateTodoItem(TodoItem item)
+        public IActionResult Create(int userId, int todoListId, TodoItemCreateVm todoItemCreateVm)
         {
-            _context.TodoItems.Add(item);
-            _context.SaveChanges();
+            var todoList = _todoListService.Get(userId, todoListId);
+            if (todoList == null) return NotFound();
 
-            return CreatedAtRoute("GetTodoItemById", new { id = item.Id }, item);
+            var todoItem = _mapper.Map<TodoItem>(todoItemCreateVm);
+            todoItem.TodoList = todoList;
+            _todoItemService.Create(todoItem);
+
+            return CreatedAtRoute(
+                "GetTodoItem", 
+                new { userId = todoList.User.Id, todoListId = todoList.Id, todoItemId = todoItem.Id }, 
+                todoItem.Id);
         }
 
-        [HttpPut("{id}")]
-        public IActionResult UpdateTodoItem(int id, TodoItem item)
+        [HttpPut("{todoItemId}")]
+        public IActionResult Update(int userId, int todoListId, int todoItemId,
+            TodoItemUpdateVm todoItemUpdateVm)
         {
-            var existingItem = _context.TodoItems.Find(id);
-            if (existingItem == null)
-            {
-                return NotFound();
-            }
+            var todoItem = _todoItemService.Get(userId, todoListId, todoItemId);
+            if (todoItem == null) return NotFound();
 
-            existingItem.IsComplete = item.IsComplete;
-            existingItem.Name = item.Name;
+            _mapper.Map(todoItemUpdateVm, todoItem);
+            _todoItemService.Update(todoItem);
 
-            _context.TodoItems.Update(existingItem);
-            _context.SaveChanges();
             return NoContent();
         }
 
-        [HttpDelete("{id}")]
-        public IActionResult DeleteTodoItem(int id)
+        [HttpDelete("{todoItemId}")]
+        public IActionResult Delete(int userId, int todoListId, int todoItemId)
         {
-            var item = _context.TodoItems.Find(id);
-            if (item == null)
-            {
-                return NotFound();
-            }
+            var todoItem = _todoItemService.Get(userId, todoListId, todoItemId);
+            if (todoItem == null) return NotFound();
 
-            _context.TodoItems.Remove(item);
-            _context.SaveChanges();
+            _todoItemService.Delete(todoItem);
+
             return NoContent();
         }
     }

@@ -31,7 +31,7 @@ namespace TodoApi.Controllers
         [HttpGet("{id}", Name = "GetUserById")]
         public ActionResult<UserVm> GetUserById(int id)
         {
-            var user = _userService.GetById(id);
+            var user = _userService.Get(id);
             if (user == null) return NotFound();
             return _mapper.Map<UserVm>(user);
         }
@@ -47,7 +47,7 @@ namespace TodoApi.Controllers
         [HttpPut("{id}")]
         public IActionResult UpdateUser(int id, UserCreateVm userCreateVm)
         {
-            var user = _userService.GetById(id);
+            var user = _userService.Get(id);
             if (user == null) return NotFound();
             _mapper.Map(userCreateVm, user);
             _userService.Update(user);
@@ -57,7 +57,7 @@ namespace TodoApi.Controllers
         [HttpDelete("{id}")]
         public IActionResult Delete(int id)
         {
-            var user = _userService.GetById(id);
+            var user = _userService.Get(id);
             if (user == null) return NotFound();
             _userService.Delete(user);
             return NoContent();

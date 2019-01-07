@@ -7,7 +7,7 @@ namespace TodoApi.IServices
     {
         List<User> GetAll();
 
-        User GetById(int id);
+        User Get(int id);
 
         void Create(User user);
 

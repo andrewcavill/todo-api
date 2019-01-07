@@ -13,10 +13,7 @@ namespace TodoApi.Models
 
         public User User { get; set; }
 
-        public IList<TodoItem> TodoItems = new List<TodoItem>();
-
-        public TodoItem TodoItem(int todoItemId) => 
-            TodoItems.FirstOrDefault(x => x.Id == todoItemId);
+        public List<TodoItem> TodoItems { get; set; } = new List<TodoItem>();
 
         public int NumberOfItems =>  TodoItems.Count;
 

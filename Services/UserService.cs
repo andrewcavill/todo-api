@@ -19,7 +19,7 @@ namespace TodoApi.Services
             return _context.Users.ToList();
         }
 
-        public User GetById(int id)
+        public User Get(int id)
         {
             return _context.Users.Find(id);
         }

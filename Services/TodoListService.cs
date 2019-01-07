@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Linq;
 using TodoApi.Models;
 using TodoApi.IServices;
+using Microsoft.EntityFrameworkCore;
 
 namespace TodoApi.Services
 {
@@ -21,10 +22,12 @@ namespace TodoApi.Services
                 .ToList();
         }
 
-        public TodoList GetById(int userId, int todoListId)
+        public TodoList Get(int userId, int todoListId)
         {
             return _context.TodoLists
                 .Where(x => x.User.Id == userId && x.Id == todoListId)
+                .Include(x => x.TodoItems)
+                .Include(x => x.User)
                 .FirstOrDefault();
         }
 
