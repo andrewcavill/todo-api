@@ -19,6 +19,7 @@ namespace TodoApi.Services
         {
             return _context.TodoLists
                 .Where(x => x.User.Id == userId)
+                .Include(x => x.TodoItems)
                 .ToList();
         }
 

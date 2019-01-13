@@ -57,6 +57,18 @@ namespace TodoApi.Controllers
                 todoItem.Id);
         }
 
+        [HttpPut("{todoItemId}/complete")]
+        public IActionResult Complete(int userId, int todoListId, int todoItemId, [FromBody] bool complete)
+        {
+            var todoItem = _todoItemService.Get(userId, todoListId, todoItemId);
+            if (todoItem == null) return NotFound();
+
+            todoItem.IsComplete = complete;
+            _todoItemService.Update(todoItem);
+
+            return NoContent();
+        }
+
         [HttpPut("{todoItemId}")]
         public IActionResult Update(int userId, int todoListId, int todoItemId,
             TodoItemUpdateVm todoItemUpdateVm)
