@@ -58,7 +58,8 @@ namespace TodoApi.Controllers
         }
 
         [HttpPut("{todoItemId}/complete")]
-        public IActionResult Complete(int userId, int todoListId, int todoItemId, [FromBody] bool complete)
+        public IActionResult Complete(int userId, int todoListId, int todoItemId, 
+            [FromBody] bool complete)
         {
             var todoItem = _todoItemService.Get(userId, todoListId, todoItemId);
             if (todoItem == null) return NotFound();
@@ -69,14 +70,14 @@ namespace TodoApi.Controllers
             return NoContent();
         }
 
-        [HttpPut("{todoItemId}")]
-        public IActionResult Update(int userId, int todoListId, int todoItemId,
-            TodoItemUpdateVm todoItemUpdateVm)
+        [HttpPut("{todoItemId}/name")]
+        public IActionResult UpdateName(int userId, int todoListId, int todoItemId,
+            [FromBody] string name)
         {
             var todoItem = _todoItemService.Get(userId, todoListId, todoItemId);
             if (todoItem == null) return NotFound();
 
-            _mapper.Map(todoItemUpdateVm, todoItem);
+            todoItem.Name = name;
             _todoItemService.Update(todoItem);
 
             return NoContent();

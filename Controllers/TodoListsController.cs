@@ -61,14 +61,27 @@ namespace TodoApi.Controllers
                 todoList.Id);
         }
 
-        [HttpPut("{todoListId}")]
-        public IActionResult Update(int userId, int todoListId, 
-            TodoListUpdateVm todoListUpdateVm)
+        [HttpPut("{todoListId}/complete")]
+        public IActionResult UpdateComplete(int userId, int todoListId, 
+            [FromBody] bool complete)
         {
             var todoList = _todoListService.Get(userId, todoListId);
             if (todoList == null) return NotFound();
 
-            _mapper.Map(todoListUpdateVm, todoList);
+            todoList.IsComplete = complete;
+            _todoListService.Update(todoList);
+
+            return NoContent();
+        }
+
+        [HttpPut("{todoListId}/name")]
+        public IActionResult UpdateName(int userId, int todoListId, 
+            [FromBody] string name)
+        {
+            var todoList = _todoListService.Get(userId, todoListId);
+            if (todoList == null) return NotFound();
+
+            todoList.Name = name;
             _todoListService.Update(todoList);
 
             return NoContent();
