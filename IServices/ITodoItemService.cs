@@ -12,7 +12,5 @@ namespace TodoApi.IServices
         void Create(TodoItem todoItem);
 
         void Update(TodoItem todoItem);
-
-        void Delete(TodoItem todoItem);
     }
 }

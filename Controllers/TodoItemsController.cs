@@ -57,14 +57,14 @@ namespace TodoApi.Controllers
                 todoItem.Id);
         }
 
-        [HttpPut("{todoItemId}/complete")]
-        public IActionResult Complete(int userId, int todoListId, int todoItemId, 
-            [FromBody] bool complete)
+        [HttpPut("{todoItemId}/iscomplete")]
+        public IActionResult UpdateIsComplete(int userId, int todoListId, int todoItemId, 
+            [FromBody] bool isComplete)
         {
             var todoItem = _todoItemService.Get(userId, todoListId, todoItemId);
             if (todoItem == null) return NotFound();
 
-            todoItem.IsComplete = complete;
+            todoItem.IsComplete = isComplete;
             _todoItemService.Update(todoItem);
 
             return NoContent();
@@ -83,13 +83,15 @@ namespace TodoApi.Controllers
             return NoContent();
         }
 
-        [HttpDelete("{todoItemId}")]
-        public IActionResult Delete(int userId, int todoListId, int todoItemId)
+        [HttpPut("{todoItemId}/isdeleted")]
+        public IActionResult UpdateIsDeleted(int userId, int todoListId, int todoItemId,
+            [FromBody] bool isDeleted)
         {
             var todoItem = _todoItemService.Get(userId, todoListId, todoItemId);
             if (todoItem == null) return NotFound();
 
-            _todoItemService.Delete(todoItem);
+            todoItem.IsDeleted = isDeleted;
+            _todoItemService.Update(todoItem);
 
             return NoContent();
         }

@@ -46,11 +46,5 @@ namespace TodoApi.Services
             _context.Update(todoItem);
             _context.SaveChanges();
         }
-
-        public void Delete(TodoItem todoItem)
-        {
-            _context.TodoItems.Remove(todoItem);
-            _context.SaveChanges();
-        }
     }
 }

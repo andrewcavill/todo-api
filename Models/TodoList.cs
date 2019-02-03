@@ -15,8 +15,8 @@ namespace TodoApi.Models
 
         public List<TodoItem> TodoItems { get; set; } = new List<TodoItem>();
 
-        public int NumberOfItems =>  TodoItems.Count;
+        public int NumberOfItems =>  TodoItems.Where(x => !x.IsDeleted).ToList().Count;
 
-        public int NumberIfItemsCompleted => TodoItems.Select(x => x.IsComplete).ToList().Count;
+        public int NumberOfItemsCompleted => TodoItems.Where(x => x.IsComplete && !x.IsDeleted).ToList().Count;
     }
 }

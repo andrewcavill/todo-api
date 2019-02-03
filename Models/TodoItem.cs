@@ -8,6 +8,8 @@ namespace TodoApi.Models
 
         public bool IsComplete { get; set; }
 
+        public bool IsDeleted { get; set; }
+
         public TodoList TodoList { get; set; }
     }
 }
