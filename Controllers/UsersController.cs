@@ -21,12 +21,12 @@ namespace TodoApi.Controllers
             _mapper = mapper;
         }
 
-        [HttpGet]
-        public ActionResult<List<UserVm>> GetAll()
-        {
-            var users = _userService.GetAll();
-            return _mapper.Map<List<UserVm>>(users);
-        }
+        // [HttpGet]
+        // public ActionResult<List<UserVm>> GetAll()
+        // {
+        //     var users = _userService.GetAll();
+        //     return _mapper.Map<List<UserVm>>(users);
+        // }
 
         [HttpGet("{id}", Name = "GetUserById")]
         public ActionResult<UserVm> GetUserById(int id)
@@ -34,6 +34,18 @@ namespace TodoApi.Controllers
             var user = _userService.Get(id);
             if (user == null) return NotFound();
             return _mapper.Map<UserVm>(user);
+        }
+
+        [HttpGet]
+        public ActionResult<List<UserVm>> GetUsers([FromQuery]string email)
+        {
+            if (email == null) {
+                var allUsers = _userService.GetAll();
+                return _mapper.Map<List<UserVm>>(allUsers);
+            }
+
+            var users = _userService.GetByEmail(email);
+            return _mapper.Map<List<UserVm>>(users);
         }
 
         [HttpPost]

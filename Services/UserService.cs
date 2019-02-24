@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using TodoApi.Models;
@@ -22,6 +23,12 @@ namespace TodoApi.Services
         public User Get(int id)
         {
             return _context.Users.Find(id);
+        }
+
+        public List<User> GetByEmail(string email)
+        {
+            return _context.Users.Where(u => 
+                string.Equals(u.Email, email, StringComparison.Ordinal)).ToList();
         }
 
         public void Create(User user)

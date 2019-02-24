@@ -9,6 +9,8 @@ namespace TodoApi.IServices
 
         User Get(int id);
 
+        List<User> GetByEmail(string email);
+
         void Create(User user);
 
         void Update(User user);
